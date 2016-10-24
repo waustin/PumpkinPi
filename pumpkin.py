@@ -1,6 +1,10 @@
 import RPi.GPIO as GPIO
 import time
 import pygame
+import random
+import os
+
+DIR = os.path.dirname(__file__)
 
 GREEN_LED_1 = 25
 GREEN_LED_2 = 24
@@ -8,28 +12,39 @@ RED_LED = 23
 
 MOTION_SENSOR = 21
 
-H3_SOUND_FILE = "halloween-3-short.mp3"
+H3_SOUND_FILE = os.path.join(DIR, "halloween-3-short.mp3")
+
+PAUSE_TIME = 120
+
+BLINK_PATTERNS = [
+    [GREEN_LED_1, GREEN_LED_2],
+    [GREEN_LED_1, GREEN_LED_2],
+    [GREEN_LED_1, GREEN_LED_2, RED_LED],
+    [RED_LED], [RED_LED],
+    [GREEN_LED_1, RED_LED]
+]
 
 
 
 # BLINK MULTIPLE LEDS
 def blink_led(led_pins=[]):
-    for led_pin in led_pins:
-        GPIO.output(led_pin, GPIO.HIGH)
-    time.sleep(0.25)
+    for x in range(5):
+    	for led_pin in led_pins:
+        	GPIO.output(led_pin, GPIO.HIGH)
+    	time.sleep(0.25)
 
-    for led_pin in led_pins:
-        GPIO.output(led_pin, GPIO.LOW)
-    time.sleep(0.25)
+    	for led_pin in led_pins:
+        	GPIO.output(led_pin, GPIO.LOW)
+    	time.sleep(0.30)
 
 
 # SCARE ACTION
 def boo():
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy():
-        blink_led([GREEN_LED_1, GREEN_LED_2])
-        blink_led([RED_LED])
-    
+	blink_led(random.choice(BLINK_PATTERNS))
+   
+ 
 # INIT GPIO
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -53,7 +68,8 @@ for led in [GREEN_LED_1, GREEN_LED_2, RED_LED]:
 while True:
     if GPIO.input(MOTION_SENSOR):
         boo()
-        time.sleep(3)
-    time.sleep(0.5)
+        time.sleep(PAUSE_TIME)
+    else:
+    	time.sleep(5)
   
 GPIO.cleanup()
