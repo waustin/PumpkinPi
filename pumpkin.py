@@ -14,7 +14,13 @@ MOTION_SENSOR = 21
 
 H3_SOUND_FILE = os.path.join(DIR, "halloween-3-short.mp3")
 
-PAUSE_TIME = 120
+SOUNDS = [os.path.join(DIR, "halloween-3-short.mp3"),
+          os.path.join(DIR, "halloween-3-short.mp3"),
+	  os.path.join(DIR, "alive.wav"),
+	  os.path.join(DIR, "l1.wav"),
+	  os.path.join(DIR, "wolfhowl.wav")]
+
+PAUSE_TIME = 6666660
 
 BLINK_PATTERNS = [
     [GREEN_LED_1, GREEN_LED_2],
@@ -40,6 +46,7 @@ def blink_led(led_pins=[]):
 
 # SCARE ACTION
 def boo():
+    pygame.mixer.music.load(random.choice(SOUNDS))
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy():
 	blink_led(random.choice(BLINK_PATTERNS))
@@ -59,7 +66,7 @@ GPIO.setup(MOTION_SENSOR, GPIO.IN)
 # INIT PYGAME
 pygame.init()
 pygame.mixer.init()
-pygame.mixer.music.load(H3_SOUND_FILE)
+#pygame.mixer.music.load(H3_SOUND_FILE)
 
 # TURN OFF LEDS 
 for led in [GREEN_LED_1, GREEN_LED_2, RED_LED]:
