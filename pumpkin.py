@@ -1,8 +1,15 @@
 import RPi.GPIO as GPIO
 import time
+import datetime
 import pygame
 import random
 import os
+import sys
+import logging
+
+time.sleep(30)
+
+logging.basicConfig(filename='/tmp/pumpkinpi.log',level=logging.INFO)
 
 DIR = os.path.dirname(__file__)
 
@@ -16,11 +23,10 @@ H3_SOUND_FILE = os.path.join(DIR, "halloween-3-short.mp3")
 
 SOUNDS = [os.path.join(DIR, "halloween-3-short.mp3"),
           os.path.join(DIR, "halloween-3-short.mp3"),
-	  os.path.join(DIR, "alive.wav"),
-	  os.path.join(DIR, "l1.wav"),
-	  os.path.join(DIR, "wolfhowl.wav")]
+	  os.path.join(DIR, "stranger.mp3"),
+	  os.path.join(DIR, "l1.wav")]
 
-PAUSE_TIME = 6666660
+PAUSE_TIME = 30
 
 BLINK_PATTERNS = [
     [GREEN_LED_1, GREEN_LED_2],
@@ -46,6 +52,7 @@ def blink_led(led_pins=[]):
 
 # SCARE ACTION
 def boo():
+    logging.info("Boo {0}\n".format(datetime.datetime.now()))
     pygame.mixer.music.load(random.choice(SOUNDS))
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy():
@@ -71,12 +78,15 @@ pygame.mixer.init()
 # TURN OFF LEDS 
 for led in [GREEN_LED_1, GREEN_LED_2, RED_LED]:
     GPIO.output(led, GPIO.LOW)
-    
+
+
+logging.info("Launching {0}\n".format(datetime.datetime.now()))
+
 while True:
     if GPIO.input(MOTION_SENSOR):
         boo()
         time.sleep(PAUSE_TIME)
     else:
-    	time.sleep(5)
+    	time.sleep(0.5)
   
 GPIO.cleanup()
