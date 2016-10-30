@@ -7,8 +7,6 @@ import os
 import sys
 import logging
 
-time.sleep(30)
-
 logging.basicConfig(filename='/tmp/pumpkinpi.log',level=logging.INFO)
 
 DIR = os.path.dirname(__file__)
@@ -19,12 +17,12 @@ RED_LED = 23
 
 MOTION_SENSOR = 21
 
+SCREAM_SOUND_FILE = os.path.join(DIR, "l1.wav")
 H3_SOUND_FILE = os.path.join(DIR, "halloween-3-short.mp3")
 
 SOUNDS = [os.path.join(DIR, "halloween-3-short.mp3"),
           os.path.join(DIR, "halloween-3-short.mp3"),
-	  os.path.join(DIR, "stranger.mp3"),
-	  os.path.join(DIR, "l1.wav")]
+	  os.path.join(DIR, "stranger.mp3")]
 
 PAUSE_TIME = 30
 
@@ -39,54 +37,62 @@ BLINK_PATTERNS = [
 
 
 # BLINK MULTIPLE LEDS
-def blink_led(led_pins=[]):
-    for x in range(5):
+def blink_led(led_pins=[], blink_time=0.25):
+    for x in range(6):
     	for led_pin in led_pins:
         	GPIO.output(led_pin, GPIO.HIGH)
-    	time.sleep(0.25)
+    	time.sleep(blink_time)
 
     	for led_pin in led_pins:
         	GPIO.output(led_pin, GPIO.LOW)
-    	time.sleep(0.30)
+    	time.sleep(blink_time+0.05)
 
 
 # SCARE ACTION
 def boo():
-    logging.info("Boo {0}\n".format(datetime.datetime.now()))
+    logging.info("Boo {0}".format(datetime.datetime.now()))
+    pygame.mixer.music.load(SCREAM_SOUND_FILE)
+    pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy():
+        blink_led(random.choice(BLINK_PATTERNS), blink_time=0.1)
+
     pygame.mixer.music.load(random.choice(SOUNDS))
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy():
 	blink_led(random.choice(BLINK_PATTERNS))
    
- 
-# INIT GPIO
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
 
-GPIO.setup(GREEN_LED_1, GPIO.OUT)
-GPIO.setup(GREEN_LED_2, GPIO.OUT)
-GPIO.setup(RED_LED, GPIO.OUT)
+def init():
+	# INIT GPIO
+	GPIO.setwarnings(False)
+	GPIO.setmode(GPIO.BCM)
 
-GPIO.setup(MOTION_SENSOR, GPIO.IN)
+	GPIO.setup(GREEN_LED_1, GPIO.OUT)
+	GPIO.setup(GREEN_LED_2, GPIO.OUT)
+	GPIO.setup(RED_LED, GPIO.OUT)
 
-
-# INIT PYGAME
-pygame.init()
-pygame.mixer.init()
-#pygame.mixer.music.load(H3_SOUND_FILE)
-
-# TURN OFF LEDS 
-for led in [GREEN_LED_1, GREEN_LED_2, RED_LED]:
-    GPIO.output(led, GPIO.LOW)
+	GPIO.setup(MOTION_SENSOR, GPIO.IN)
 
 
-logging.info("Launching {0}\n".format(datetime.datetime.now()))
+	# INIT PYGAME
+	pygame.init()
+	pygame.mixer.init()
 
-while True:
-    if GPIO.input(MOTION_SENSOR):
-        boo()
-        time.sleep(PAUSE_TIME)
-    else:
-    	time.sleep(0.5)
+	# TURN OFF LEDS 
+	for led in [GREEN_LED_1, GREEN_LED_2, RED_LED]:
+    		GPIO.output(led, GPIO.LOW)
+
+if __name__ == '__main__':
+	time.sleep(20)
+	init()
+
+	logging.info("Launching {0}".format(datetime.datetime.now()))
+
+	while True:
+    		if GPIO.input(MOTION_SENSOR):
+        		boo()
+        		time.sleep(PAUSE_TIME)
+    		else:
+    			time.sleep(0.5)
   
-GPIO.cleanup()
+	GPIO.cleanup()

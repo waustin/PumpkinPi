@@ -1,6 +1,6 @@
 import pygame
 
-SOUND = "halloween3.mp3"
+SOUND = "l1.wav"
 pygame.init()
 pygame.mixer.init()
 pygame.mixer.music.load(SOUND)
